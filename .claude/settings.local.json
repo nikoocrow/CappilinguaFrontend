@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/index.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/js/main.js)",
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(lsof -ti:8000)",
+      "Bash(xargs kill)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s http://localhost:5173/js/main.js)"
+    ]
+  }
+}

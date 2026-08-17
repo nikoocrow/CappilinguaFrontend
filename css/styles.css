@@ -1,0 +1,163 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  background: #1a1d24;
+}
+
+#info {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: #cfd6e4;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 8px 12px;
+  border-radius: 8px;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- Diálogo con NPC ---------- */
+
+#dialog {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: min(520px, calc(100vw - 32px));
+  box-sizing: border-box;
+  background: rgba(26, 29, 36, 0.92);
+  border: 1px solid #4c566a;
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: #eceff4;
+  font-family: system-ui, sans-serif;
+  backdrop-filter: blur(6px);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dialog-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: #a3be8c;
+}
+
+.dialog-close {
+  background: none;
+  border: none;
+  color: #8892a6;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.dialog-close:hover {
+  color: #eceff4;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dialog-response {
+  margin: 0 0 12px;
+  min-height: 1.4em;
+  font-size: 15px;
+  line-height: 1.4;
+  color: #eceff4;
+}
+
+.dialog-prompt {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #8892a6;
+}
+
+.dialog-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dialog-option {
+  background: #3b4252;
+  border: 1px solid #4c566a;
+  color: #d8dee9;
+  font-size: 14px;
+  font-family: inherit;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dialog-option:hover {
+  background: #434c5e;
+  border-color: #81a1c1;
+}
+
+.dialog-option:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.dialog-option.correct {
+  background: rgba(163, 190, 140, 0.25);
+  border-color: #a3be8c;
+  color: #a3be8c;
+  opacity: 1;
+}
+
+.dialog-option.incorrect {
+  background: rgba(191, 97, 106, 0.18);
+  border-color: #bf616a;
+  color: #bf616a;
+  text-decoration: line-through;
+}
+
+/* ---------- Feedback del ejercicio ---------- */
+
+.dialog-feedback {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.dialog-feedback.ok {
+  background: rgba(163, 190, 140, 0.15);
+  border: 1px solid rgba(163, 190, 140, 0.5);
+  color: #a3be8c;
+}
+
+.dialog-feedback.error {
+  background: rgba(191, 97, 106, 0.12);
+  border: 1px solid rgba(191, 97, 106, 0.5);
+  color: #d08a91;
+}
+
+.dialog-retry {
+  margin-top: 12px;
+  background: #5e81ac;
+  border: 1px solid #81a1c1;
+  color: #eceff4;
+  font-size: 14px;
+  font-family: inherit;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.dialog-retry:hover {
+  background: #6b8cb8;
+}

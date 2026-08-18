@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import Experience from '../Experience.js';
-import { PLANE_SIZE } from '../World/Floor.js';
+import { MAP_SIZE } from '../World/mapConfig.js';
 
 const DOUBLE_CLICK_MS = 350;
 const ZOOM_MIN = 0.5;
@@ -46,7 +46,7 @@ export default class Input {
     if (hits.length > 0) {
       const p = hits[0].point;
       // Limitar al plano
-      const half = PLANE_SIZE / 2 - 0.5;
+      const half = MAP_SIZE / 2 - 0.5;
       const x = THREE.MathUtils.clamp(p.x, -half, half);
       const z = THREE.MathUtils.clamp(p.z, -half, half);
 

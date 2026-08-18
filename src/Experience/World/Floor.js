@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import Experience from '../Experience.js';
-
-export const PLANE_SIZE = 30;
+import { MAP_SIZE } from './mapConfig.js';
 
 export default class Floor {
   constructor() {
@@ -9,22 +8,18 @@ export default class Floor {
     this.scene = this.experience.scene;
 
     this.setMesh();
-    this.setGrid();
   }
 
+  // Plano base de todo el mapa: es la capa "lógica" siempre presente (clic
+  // para moverse funciona en cualquier punto), independiente de qué chunks
+  // estén cargados visualmente encima (ver ChunkGrid.js).
   setMesh() {
     this.mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(PLANE_SIZE, PLANE_SIZE),
-      new THREE.MeshStandardMaterial({ color: 0x2e3440, roughness: 0.9 })
+      new THREE.PlaneGeometry(MAP_SIZE, MAP_SIZE),
+      new THREE.MeshStandardMaterial({ color: 0x232730, roughness: 0.9 })
     );
     this.mesh.rotation.x = -Math.PI / 2;
     this.mesh.receiveShadow = true;
     this.scene.add(this.mesh);
-  }
-
-  setGrid() {
-    this.grid = new THREE.GridHelper(PLANE_SIZE, PLANE_SIZE, 0x4c566a, 0x3b4252);
-    this.grid.position.y = 0.01;
-    this.scene.add(this.grid);
   }
 }

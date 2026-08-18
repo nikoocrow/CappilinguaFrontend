@@ -4,6 +4,7 @@ import Floor from './Floor.js';
 import Player from './Player.js';
 import TargetMarker from './TargetMarker.js';
 import Npc from './Npc.js';
+import ChunkGrid from './ChunkGrid.js';
 import Input from '../Input/Input.js';
 import { DialogUI } from '../UI/DialogUI.js';
 import { KOREAN_GREETING_DIALOG } from '../UI/dialogs.js';
@@ -21,6 +22,7 @@ export default class World {
     this.resources.on('ready', () => {
       this.environment = new Environment();
       this.floor = new Floor();
+      this.chunkGrid = new ChunkGrid();
       this.player = new Player();
       this.marker = new TargetMarker();
       this.npcs = [new Npc({ x: 6, z: -4, name: 'Capi', dialog: KOREAN_GREETING_DIALOG })];
@@ -60,6 +62,7 @@ export default class World {
 
     this.player.update();
     this.marker.update();
+    this.chunkGrid.update(this.player.position, this.experience.time.delta);
     for (const npc of this.npcs) npc.update(this.player.position);
 
     // Al llegar junto al NPC pendiente, abrir el diálogo

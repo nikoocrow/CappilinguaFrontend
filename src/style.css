@@ -18,14 +18,192 @@ canvas.webgl {
   position: absolute;
   top: 12px;
   left: 12px;
+  z-index: 1; /* el canvas pinta después en el DOM y sin esto lo tapa */
   color: #cfd6e4;
   font-family: system-ui, sans-serif;
   font-size: 14px;
   background: rgba(0, 0, 0, 0.35);
   padding: 8px 12px;
   border-radius: 8px;
-  pointer-events: none;
   user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info-link {
+  pointer-events: auto;
+  color: #88c0d0;
+  text-decoration: none;
+  border: 1px solid #4c566a;
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.info-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #81a1c1;
+}
+
+/* ---------- Personalización de personaje (customize.html) ---------- */
+
+#customize-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(340px, 100vw);
+  box-sizing: border-box;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(26, 29, 36, 0.85);
+  border-left: 1px solid #4c566a;
+  backdrop-filter: blur(6px);
+  color: #eceff4;
+  font-family: system-ui, sans-serif;
+}
+
+#customize-panel h1 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.customize-randomize {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  background: #3b4252;
+  border: 1px solid #4c566a;
+  color: #d8dee9;
+  font-size: 14px;
+  font-family: inherit;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.customize-randomize:hover {
+  background: #434c5e;
+  border-color: #81a1c1;
+}
+
+.customize-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.customize-slot {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 8px;
+  background: #262a33;
+  border: 1px solid #3b4252;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.customize-slot-label {
+  font-size: 13px;
+  color: #8892a6;
+}
+
+.customize-slot-value {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  color: #eceff4;
+  text-align: center;
+}
+
+.customize-slot-arrow {
+  background: #3b4252;
+  border: 1px solid #4c566a;
+  color: #d8dee9;
+  font-size: 13px;
+  font-family: inherit;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.customize-slot-arrow:hover {
+  background: #434c5e;
+  border-color: #81a1c1;
+}
+
+.customize-skin {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.customize-skin-swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.customize-skin-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #4c566a;
+  cursor: pointer;
+  padding: 0;
+}
+
+.customize-skin-swatch:hover {
+  border-color: #eceff4;
+}
+
+.customize-skin-picker {
+  width: 100%;
+  height: 32px;
+  border: 1px solid #4c566a;
+  border-radius: 6px;
+  background: #262a33;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.customize-save {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  background: #5e81ac;
+  border: 1px solid #81a1c1;
+  color: #eceff4;
+  font-size: 14px;
+  font-family: inherit;
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.customize-save:hover {
+  background: #6b8cb8;
+}
+
+@media (max-width: 720px) {
+  #customize-panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: 45vh;
+    border-left: none;
+    border-top: 1px solid #4c566a;
+  }
 }
 
 /* ---------- Diálogo con NPC ---------- */

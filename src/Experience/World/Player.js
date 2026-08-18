@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import Experience from '../Experience.js';
+import { BODY_MESH_NAME, loadCharacterConfig, visibleMeshNamesFor } from './characterConfig.js';
 
 const SPEED = 4.8; // unidades por segundo (-40% para acompasar con la animación)
 const RUN_SPEED = SPEED * 2;
@@ -7,18 +8,6 @@ const TURN_SPEED = 10; // rapidez de giro
 const REST_HEIGHT = 0;
 const MODEL_SCALE = 1.56;
 const ANIM_FADE = 0.25; // duración del cross-fade entre animaciones
-
-// El glb trae todas las variantes de ropa/accesorios como mallas separadas
-// sobre un mismo esqueleto; solo mostramos un outfit por defecto.
-const VISIBLE_MESH_NAMES = new Set([
-  'Body_010',
-  'Hairstyle_male_010',
-  'Male_emotion_usual_001',
-  'T_Shirt_009',
-  'Pants_010',
-  'Socks_008',
-  'Shoe_Sneakers_009',
-]);
 
 export default class Player {
   constructor() {
@@ -52,11 +41,23 @@ export default class Player {
   setModel() {
     this.model = this.resources.items.characterModel.scene;
     this.model.scale.setScalar(MODEL_SCALE);
+
+    // Outfit y color de piel elegidos en la pantalla de personalización
+    // (customize.html), persistidos en localStorage. Ver characterConfig.js.
+    const config = loadCharacterConfig();
+    const visibleMeshes = visibleMeshNamesFor(config.selection);
+    visibleMeshes.add(BODY_MESH_NAME);
+
     this.model.traverse((child) => {
       if (!child.isMesh) return;
       child.castShadow = true;
       child.receiveShadow = true;
-      child.visible = VISIBLE_MESH_NAMES.has(child.name);
+      child.visible = visibleMeshes.has(child.name);
+
+      if (child.name === BODY_MESH_NAME) {
+        child.material = child.material.clone();
+        child.material.color.set(config.skinColor);
+      }
     });
     this.group.add(this.model);
   }

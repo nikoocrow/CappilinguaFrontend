@@ -1,14 +1,8 @@
+import { CHARACTER_MODEL_SOURCE, IDLE_ANIMATION_SOURCE } from './World/characterConfig.js';
+
 export default [
-  {
-    name: 'characterModel',
-    type: 'gltfModel',
-    path: '/characters/Creative_Characters_Free_glb/Creative_Character_free.glb',
-  },
-  {
-    name: 'idleAnimation',
-    type: 'fbx',
-    path: '/characters/animations/Idle.fbx',
-  },
+  CHARACTER_MODEL_SOURCE,
+  IDLE_ANIMATION_SOURCE,
   {
     name: 'walkAnimation',
     type: 'fbx',

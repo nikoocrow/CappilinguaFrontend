@@ -10,7 +10,31 @@
       "Bash(xargs kill)",
       "Bash(npm run *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
-      "Bash(curl -s http://localhost:5173/js/main.js)"
+      "Bash(curl -s http://localhost:5173/js/main.js)",
+      "Bash(mkdir -p src/Experience/Utils src/Experience/World src/Experience/UI src/Experience/Input)",
+      "Bash(mkdir -p static/characters/Creative_Characters_Free_glb/textures static/characters/animations)",
+      "Bash(mkdir -p vendor-assets)",
+      "Bash(mv \"assets/characters/Creative_Characters_Free_glb/Creative_Character_free.glb\" \"static/characters/Creative_Characters_Free_glb/\")",
+      "Bash(mv \"assets/characters/Creative_Characters_Free_glb/textures/Textures_4.png\" \"static/characters/Creative_Characters_Free_glb/textures/\")",
+      "Bash(mv \"assets/characters/animations/Idle.fbx\" \"static/characters/animations/\")",
+      "Bash(mv \"assets/characters/animations/Walking.fbx\" \"static/characters/animations/\")",
+      "Bash(mv \"assets/characters/animations/Running.fbx\" \"static/characters/animations/\")",
+      "Bash(cd \"/c/nikocrow/Proyectos/Capillingua/Cappilingua/MoveExperiments\" && rmdir -p assets/characters/Creative_Characters_Free_glb/textures assets/characters/animations 2>/dev/null; find assets -type d 2>/dev/null; echo done)",
+      "Bash(curl -s -o /dev/null -w \"index.html: %{http_code}\\\\n\" http://localhost:5183/)",
+      "Bash(curl -s -o /dev/null -w \"script.js: %{http_code}\\\\n\" http://localhost:5183/script.js)",
+      "Bash(curl -s -o /dev/null -w \"glb: %{http_code}\\\\n\" \"http://localhost:5183/characters/Creative_Characters_Free_glb/Creative_Character_free.glb\")",
+      "Bash(curl -s http://localhost:5183/Experience/Experience.js)",
+      "Read(//tmp/**)",
+      "Bash(pkill -f \"vite --port 5183\")",
+      "Bash(lsof -ti:5183 -sTCP:LISTEN)",
+      "Bash(xargs -r kill)",
+      "Bash(nohup npm run dev -- --port 5183)",
+      "Bash(disown)",
+      "Bash(timeout 30 bash -c 'until curl -sf http://localhost:5183 >/dev/null; do sleep 1; done')",
+      "Bash(chromium-cli --help)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(node -e \"require.resolve\\('playwright-core'\\)\")",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")"
     ]
   }
 }

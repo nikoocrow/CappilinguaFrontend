@@ -1,7 +1,14 @@
 import * as THREE from 'three';
+import Experience from '../Experience.js';
 
-const FACE_RADIUS = 5;   // distancia a la que empieza a mirar al jugador
+const FACE_RADIUS = 5; // distancia a la que empieza a mirar al jugador
 const TURN_SPEED = 5;
+
+// Geometrías/materiales compartidos a nivel de módulo: si se agregan más NPCs
+// no hace falta duplicar buffers de geometría por instancia.
+const bodyGeometry = new THREE.CapsuleGeometry(0.35, 0.6, 8, 16);
+const headGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+const headMaterial = new THREE.MeshStandardMaterial({ color: 0xe5c07b, roughness: 0.6 });
 
 function makeBubbleSprite() {
   // Globo de "!" dibujado en un canvas para no depender de imágenes externas
@@ -26,22 +33,25 @@ function makeBubbleSprite() {
   return sprite;
 }
 
-export class NPC {
-  constructor(scene, { x = 6, z = -4, name = 'NPC', dialog = null, color = 0xa3be8c } = {}) {
+export default class Npc {
+  constructor({ x = 6, z = -4, name = 'NPC', dialog = null, color = 0xa3be8c } = {}) {
+    this.experience = new Experience();
+    this.scene = this.experience.scene;
+    this.time = this.experience.time;
+
     this.name = name;
     this.dialog = dialog;
     this.interactRadius = 2.2;
 
     this.group = new THREE.Group();
 
-    const bodyMat = new THREE.MeshStandardMaterial({ color, roughness: 0.6 });
-    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.35, 0.6, 8, 16), bodyMat);
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.6 });
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
     body.position.y = 0.65;
     body.castShadow = true;
     this.group.add(body);
 
-    const headMat = new THREE.MeshStandardMaterial({ color: 0xe5c07b, roughness: 0.6 });
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), headMat);
+    const head = new THREE.Mesh(headGeometry, headMaterial);
     head.position.y = 1.5;
     head.castShadow = true;
     this.group.add(head);
@@ -51,7 +61,7 @@ export class NPC {
     this.group.add(this.bubble);
 
     this.group.position.set(x, 0, z);
-    scene.add(this.group);
+    this.scene.add(this.group);
 
     this._time = Math.random() * Math.PI * 2;
   }
@@ -75,7 +85,9 @@ export class NPC {
     return Math.hypot(dx, dz) <= this.interactRadius;
   }
 
-  update(dt, playerPosition) {
+  update(playerPosition) {
+    const dt = this.time.delta;
+
     // El globo flota suavemente
     this._time += dt;
     this.bubble.position.y = 2.3 + Math.sin(this._time * 2.5) * 0.12;

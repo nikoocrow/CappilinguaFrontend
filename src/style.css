@@ -7,6 +7,13 @@ body {
   background: #1a1d24;
 }
 
+canvas.webgl {
+  position: fixed;
+  top: 0;
+  left: 0;
+  outline: none;
+}
+
 #info {
   position: absolute;
   top: 12px;

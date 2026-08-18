@@ -18,9 +18,11 @@ export default class Environment {
     this.ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     this.scene.add(this.ambientLight);
 
-    this.sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    this.sunLight = new THREE.DirectionalLight(0xffffff, 3.28);
     this.sunLight.position.set(15, 25, 10);
-    this.sunLight.castShadow = true;
+    // Sombras apagadas por defecto (costo de render evitable); activables
+    // desde el debug con "Sombras activas" para probarlas puntualmente.
+    this.sunLight.castShadow = false;
     this.sunLight.shadow.camera.left = -20;
     this.sunLight.shadow.camera.right = 20;
     this.sunLight.shadow.camera.top = 20;
@@ -31,7 +33,7 @@ export default class Environment {
     this.sunLight.shadow.mapSize.set(1024, 1024);
     // Evita shadow acne en mallas curvas (personaje): desplaza la geometría
     // a lo largo de su normal antes de comparar profundidad de sombra.
-    this.sunLight.shadow.normalBias = 0.03;
+    this.sunLight.shadow.normalBias = 0.183;
     this.scene.add(this.sunLight);
 
     if (this.debug.active) {

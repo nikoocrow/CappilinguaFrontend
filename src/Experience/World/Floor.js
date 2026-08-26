@@ -20,6 +20,9 @@ export default class Floor {
     );
     this.mesh.rotation.x = -Math.PI / 2;
     this.mesh.receiveShadow = true;
+    // El suelo es estático: matriz congelada, no se recompone por frame.
+    this.mesh.updateMatrix();
+    this.mesh.matrixAutoUpdate = false;
     this.scene.add(this.mesh);
   }
 }

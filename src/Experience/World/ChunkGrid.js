@@ -10,22 +10,31 @@ const LOAD_RADIUS = 1; // distancia Chebyshev: carga una vecindad de 3x3 chunks
 // real: recalcula la vecindad necesaria solo cuando el jugador cambia de
 // celda, nunca en cada frame (ver reglas 14-18 de system-design.md).
 export default class ChunkGrid {
-  constructor() {
+  // Los callbacks avisan cuándo una celda entra al radio de carga y cuándo
+  // sale definitivamente (después del fade-out) — es el enganche para
+  // sistemas que pueblan la celda, como NpcPopulation. Un chunk cuya
+  // remoción se cancela nunca dispara onChunkUnloaded, así los pares
+  // load/unload quedan siempre balanceados.
+  constructor({ onChunkLoaded, onChunkUnloaded } = {}) {
     this.experience = new Experience();
     this.scene = this.experience.scene;
 
+    this.onChunkLoaded = onChunkLoaded;
+    this.onChunkUnloaded = onChunkUnloaded;
+
     this.chunks = new Map(); // key "cx,cz" -> Chunk
-    this._playerChunk = null;
+    this._playerCx = null;
+    this._playerCz = null;
+    this._cell = { cx: 0, cz: 0 }; // scratch reusado por frame (regla 2)
   }
 
   update(playerPosition, dt) {
-    const current = worldToChunk(playerPosition.x, playerPosition.z);
-    const changedCell =
-      !this._playerChunk || current.cx !== this._playerChunk.cx || current.cz !== this._playerChunk.cz;
+    const cell = worldToChunk(playerPosition.x, playerPosition.z, this._cell);
 
-    if (changedCell) {
-      this._playerChunk = current;
-      this._reconcile(current);
+    if (cell.cx !== this._playerCx || cell.cz !== this._playerCz) {
+      this._playerCx = cell.cx;
+      this._playerCz = cell.cz;
+      this._reconcile(cell);
     }
 
     this._updateFades(dt);
@@ -53,10 +62,12 @@ export default class ChunkGrid {
       const chunk = new Chunk(cx, cz, chunkCenter(cx, cz));
       this.scene.add(chunk.group);
       this.chunks.set(key, chunk);
+      this.onChunkLoaded?.(cx, cz);
     }
 
     for (const [key, chunk] of this.chunks) {
       if (needed.has(key)) {
+        chunk.cancelRemoval();
         chunk.setActive(chunk.cx === centerChunk.cx && chunk.cz === centerChunk.cz);
       } else {
         chunk.markForRemoval();
@@ -70,6 +81,7 @@ export default class ChunkGrid {
         this.scene.remove(chunk.group);
         chunk.dispose();
         this.chunks.delete(key);
+        this.onChunkUnloaded?.(chunk.cx, chunk.cz);
       }
     }
   }

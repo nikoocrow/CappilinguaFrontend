@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 import Experience from '../Experience.js';
-import { BODY_MESH_NAME, loadCharacterConfig, visibleMeshNamesFor } from './characterConfig.js';
+import { BODY_MESH_NAME, MODEL_SCALE, loadCharacterConfig, visibleMeshNamesFor } from './characterConfig.js';
 
 const SPEED = 4.8; // unidades por segundo (-40% para acompasar con la animación)
 const RUN_SPEED = SPEED * 2;
 const TURN_SPEED = 10; // rapidez de giro
 const REST_HEIGHT = 0;
-const MODEL_SCALE = 1.56;
 const ANIM_FADE = 0.25; // duración del cross-fade entre animaciones
 
 export default class Player {

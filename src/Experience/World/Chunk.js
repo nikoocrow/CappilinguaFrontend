@@ -74,6 +74,13 @@ export default class Chunk {
     );
     this.label.position.y = 0.6;
     this.group.add(this.label);
+
+    // Los chunks nunca se mueven después de crearse (solo cambia la opacidad
+    // de sus materiales): congelar las matrices evita recomponerlas por frame.
+    for (const object of [this.group, this.mesh, this.label]) {
+      object.updateMatrix();
+      object.matrixAutoUpdate = false;
+    }
   }
 
   setActive(active) {
@@ -86,10 +93,18 @@ export default class Chunk {
     this._removing = true;
   }
 
+  // Si el jugador vuelve antes de que termine el fade-out, el chunk se
+  // recupera desde la opacidad que tenga en vez de desaparecer y recrearse.
+  cancelRemoval() {
+    this._removing = false;
+  }
+
   // Anima el fade in/out. Devuelve true cuando terminó de desvanecerse y
   // ya puede sacarse de la escena.
   updateFade(dt) {
     const target = this._removing ? 0 : 1;
+    if (this._opacity === target) return false; // asentado: no tocar materiales por frame
+
     this._opacity = THREE.MathUtils.clamp(this._opacity + Math.sign(target - this._opacity) * FADE_SPEED * dt, 0, 1);
     this.mesh.material.opacity = this._opacity * 0.85;
     this.label.material.opacity = this._opacity;

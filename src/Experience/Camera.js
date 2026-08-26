@@ -4,6 +4,7 @@ import Experience from './Experience.js';
 export const FRUSTUM_SIZE = 20;
 const ISO_DISTANCE = 30;
 const FOLLOW_SMOOTHNESS = 4;
+const ZOOM_SMOOTHNESS = 4;
 
 export default class Camera {
   constructor() {
@@ -14,6 +15,10 @@ export default class Camera {
     this._target = null;
     this._desired = new THREE.Vector3();
     this._offset = new THREE.Vector3();
+
+    // Zoom deseado: el update interpola instance.zoom hacia este valor,
+    // así tanto la rueda como el zoom de diálogo quedan suavizados.
+    this.zoomTarget = 1;
 
     this.setInstance();
   }
@@ -60,5 +65,13 @@ export default class Camera {
     // Interpolación exponencial: suave e independiente del framerate
     const t = 1 - Math.exp(-FOLLOW_SMOOTHNESS * dt);
     this.instance.position.lerp(this._desired, t);
+
+    // Zoom suave hacia zoomTarget; la matriz de proyección solo se
+    // recalcula mientras el zoom realmente está cambiando.
+    const zoomDelta = this.zoomTarget - this.instance.zoom;
+    if (Math.abs(zoomDelta) > 0.001) {
+      this.instance.zoom += zoomDelta * (1 - Math.exp(-ZOOM_SMOOTHNESS * dt));
+      this.instance.updateProjectionMatrix();
+    }
   }
 }

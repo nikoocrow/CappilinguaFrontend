@@ -3,11 +3,13 @@ import Environment from './Environment.js';
 import Floor from './Floor.js';
 import Player from './Player.js';
 import TargetMarker from './TargetMarker.js';
-import Npc from './Npc.js';
+import NpcPopulation from './NpcPopulation.js';
 import ChunkGrid from './ChunkGrid.js';
 import Input from '../Input/Input.js';
 import { DialogUI } from '../UI/DialogUI.js';
-import { KOREAN_GREETING_DIALOG } from '../UI/dialogs.js';
+
+// Zoom al que se acerca la cámara mientras la tarjeta de diálogo está abierta
+const DIALOG_ZOOM = 1.8;
 
 export default class World {
   constructor() {
@@ -18,14 +20,24 @@ export default class World {
     this.dialog = new DialogUI();
     // NPC al que el jugador va caminando para hablarle
     this.pendingNPC = null;
+    // Zoom que tenía el usuario antes de abrirse el diálogo (null = cerrado)
+    this._preDialogZoom = null;
 
     this.resources.on('ready', () => {
       this.environment = new Environment();
       this.floor = new Floor();
-      this.chunkGrid = new ChunkGrid();
+
+      // Los NPCs viven asociados a las tiles: cada celda que entra al radio
+      // de carga spawnea sus NPCs (npcSpawns.js) y los despawnea al salir.
+      this.population = new NpcPopulation({ onDespawn: (npc) => this._onNpcDespawned(npc) });
+      this.chunkGrid = new ChunkGrid({
+        onChunkLoaded: (cx, cz) => this.population.spawnChunk(cx, cz),
+        onChunkUnloaded: (cx, cz) => this.population.despawnChunk(cx, cz),
+      });
+
       this.player = new Player();
       this.marker = new TargetMarker();
-      this.npcs = [new Npc({ x: 6, z: -4, name: 'Capi', dialog: KOREAN_GREETING_DIALOG })];
+      this.npcs = this.population.npcs; // array vivo, mutado por la población
 
       this.camera.setTarget(this.player.group);
 
@@ -36,6 +48,13 @@ export default class World {
         onNPC: (npc) => this._onNPC(npc),
       });
     });
+  }
+
+  // Si el NPC con el que se interactuaba desaparece con su chunk, limpiar
+  // las referencias para no perseguir/dialogar con un objeto fuera de escena.
+  _onNpcDespawned(npc) {
+    if (this.pendingNPC === npc) this.pendingNPC = null;
+    if (this.dialog.npc === npc) this.dialog.close();
   }
 
   _onGround(x, z, running) {
@@ -74,6 +93,17 @@ export default class World {
     // Si el jugador se aleja, cerrar la conversación
     if (this.dialog.isOpen && !this.dialog.npc.isNear(this.player.position)) {
       this.dialog.close();
+    }
+
+    // Zoom de cámara ligado al estado del diálogo. Se detecta la transición
+    // acá (y no en los open/close de World) porque el diálogo también puede
+    // cerrarse desde su propio botón ×.
+    if (this.dialog.isOpen && this._preDialogZoom === null) {
+      this._preDialogZoom = this.camera.zoomTarget;
+      this.camera.zoomTarget = Math.max(this.camera.zoomTarget, DIALOG_ZOOM);
+    } else if (!this.dialog.isOpen && this._preDialogZoom !== null) {
+      this.camera.zoomTarget = this._preDialogZoom;
+      this._preDialogZoom = null;
     }
   }
 }

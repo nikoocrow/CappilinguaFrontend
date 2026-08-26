@@ -22,12 +22,10 @@ export function chunkCenter(cx, cz) {
 }
 
 // Coordenada de celda a la que pertenece una posición de mundo, clampeada
-// a los límites de la grilla.
-export function worldToChunk(x, z) {
-  const cx = Math.round(x / CHUNK_SIZE + HALF_GRID);
-  const cz = Math.round(z / CHUNK_SIZE + HALF_GRID);
-  return {
-    cx: clamp(cx, 0, GRID_DIM - 1),
-    cz: clamp(cz, 0, GRID_DIM - 1),
-  };
+// a los límites de la grilla. Acepta un objeto `out` reusable para poder
+// llamarla por frame sin allocations (regla 2 del system design).
+export function worldToChunk(x, z, out = { cx: 0, cz: 0 }) {
+  out.cx = clamp(Math.round(x / CHUNK_SIZE + HALF_GRID), 0, GRID_DIM - 1);
+  out.cz = clamp(Math.round(z / CHUNK_SIZE + HALF_GRID), 0, GRID_DIM - 1);
+  return out;
 }

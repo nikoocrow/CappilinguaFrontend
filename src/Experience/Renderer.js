@@ -16,6 +16,8 @@ export default class Renderer {
     this.instance = new THREE.WebGLRenderer({
       canvas: this.canvas,
       antialias: true,
+      stencil: false, // no se usa stencil: ahorra memoria del framebuffer
+      powerPreference: 'high-performance',
     });
 
     this.instance.shadowMap.enabled = true;

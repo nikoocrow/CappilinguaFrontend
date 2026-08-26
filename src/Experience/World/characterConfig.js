@@ -19,6 +19,10 @@ export const IDLE_ANIMATION_SOURCE = {
 // Malla del cuerpo base: siempre visible, es la que recibe el tinte de piel.
 export const BODY_MESH_NAME = 'Body_010';
 
+// Escala del modelo en la escena, compartida entre Player y NPCs para que
+// todos los personajes tengan la misma altura.
+export const MODEL_SCALE = 1.56;
+
 // Cada slot es mutuamente excluyente entre sus opciones (a lo sumo una malla
 // visible a la vez). `mesh: null` es la opción "nada" para slots opcionales.
 export const OUTFIT_SLOTS = [
@@ -176,4 +180,17 @@ export function saveCharacterConfig(config) {
 // (sin incluir BODY_MESH_NAME, que siempre está presente aparte).
 export function visibleMeshNamesFor(selection) {
   return new Set(Object.values(selection).filter(Boolean));
+}
+
+// Outfit aleatorio (una opción por slot + tono de piel), usado por los NPCs.
+// Acepta un RNG inyectable para poder generar outfits determinísticos
+// (mismo seed ⇒ mismo look, ver npcSpawns.js).
+export function randomCharacterConfig(rng = Math.random) {
+  const selection = {};
+  for (const slot of OUTFIT_SLOTS) {
+    const option = slot.options[Math.floor(rng() * slot.options.length)];
+    selection[slot.key] = option.mesh;
+  }
+  const tone = SKIN_TONES[Math.floor(rng() * SKIN_TONES.length)];
+  return { selection, skinColor: tone.color };
 }

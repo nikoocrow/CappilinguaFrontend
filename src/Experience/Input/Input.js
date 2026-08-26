@@ -60,11 +60,14 @@ export default class Input {
   }
 
   // Zoom con la rueda del ratón: en una cámara ortográfica basta con ajustar
-  // `zoom` (no hay que mover la cámara ni tocar el frustum).
+  // `zoom` (no hay que mover la cámara ni tocar el frustum). Se mueve el
+  // zoomTarget y Camera.update lo interpola suavemente.
   _handleWheel(event) {
     event.preventDefault();
-    const camera = this.camera.instance;
-    camera.zoom = THREE.MathUtils.clamp(camera.zoom - event.deltaY * ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX);
-    camera.updateProjectionMatrix();
+    this.camera.zoomTarget = THREE.MathUtils.clamp(
+      this.camera.zoomTarget - event.deltaY * ZOOM_SPEED,
+      ZOOM_MIN,
+      ZOOM_MAX
+    );
   }
 }

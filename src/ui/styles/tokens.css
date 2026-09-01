@@ -1,0 +1,94 @@
+/* Tokens del handoff de diseño (design_handoff_cappilingua/README.md).
+   Fuente única de verdad de color/tipografía/radio/sombra para toda la UI
+   de React. Ningún componente debería escribir un hex a mano. */
+:root {
+  /* Fondos */
+  --bg-base: #0b1120;
+  --bg-chrome: #0c1322;
+  --bg-panel: #0e1426;
+  --bg-panel-alt: #0d1322;
+  --bg-input: #161d33;
+  --bg-capsule: #141c30;
+  --bg-stage: #070b15;
+
+  /* Superficies y bordes */
+  --surface-1: rgba(255, 255, 255, 0.04);
+  --surface-2: rgba(255, 255, 255, 0.045);
+  --surface-3: rgba(255, 255, 255, 0.06);
+  --border-hairline: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Texto */
+  --text-primary: #eef1fb;
+  --text-secondary: #c3c9de;
+  --text-tertiary: #9aa3bf;
+  --text-quaternary: #7a8298;
+  --text-disabled: #6f7896;
+  --text-nav: #aeb6d0;
+
+  /* Marca */
+  --purple: #7c3aed;
+  --purple-light: #9b6bff;
+  --purple-lighter: #b794ff;
+  --lavender: #c4a6ff;
+  --lavender-text: #a78bff;
+  --purple-deep: #5a23b3;
+
+  /* Acentos y estados */
+  --gold: #f5c451;
+  --gold-dark: #f2a93a;
+  --gold-light: #ffd980;
+  --won: #4fb3a8;
+  --won-stroke: #2f8378;
+  --won-ink: #06231f;
+  --won-tint: rgba(79, 179, 168, 0.12);
+  --gem: #a87bff;
+  --gem-edge: #d3bcff;
+  --live: #ef4444;
+  --live-dark: #dc2626;
+  --success: #22c55e;
+  --success-light: #5ee08a;
+  --error: #ef4444;
+  --error-light: #ff8585;
+  --pin: #ef4d6d;
+
+  /* Degradados */
+  --grad-primary: linear-gradient(135deg, #9b6bff, #7c3aed);
+  --grad-xp: linear-gradient(90deg, #7c3aed, #b794ff);
+  --grad-reward: linear-gradient(90deg, #ffd980, #f2a93a);
+  --grad-logo: linear-gradient(180deg, #ffd980, #f2a93a);
+  --grad-nav-active: linear-gradient(100deg, rgba(124, 58, 237, 0.4), rgba(124, 58, 237, 0.12));
+  --grad-live: linear-gradient(135deg, #ef4444, #dc2626);
+  --grad-success: linear-gradient(135deg, #22c55e, #16a34a);
+
+  /* Tipografía */
+  --font-display: 'Baloo 2', system-ui, sans-serif;
+  --font-ui: 'Nunito', system-ui, sans-serif;
+  --font-editorial: 'Cormorant Garamond', Georgia, serif;
+
+  /* Radios */
+  --r-xs: 7px;
+  --r-sm: 9px;
+  --r-md: 11px;
+  --r-lg: 13px;
+  --r-xl: 15px;
+  --r-2xl: 18px;
+  --r-3xl: 22px;
+  --r-pill: 999px;
+
+  /* Sombras */
+  --shadow-primary-b: 0 4px 0 #5a23b3;
+  --shadow-card: 0 8px 22px rgba(0, 0, 0, 0.45);
+  --shadow-panel: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 30px 70px rgba(0, 0, 0, 0.6);
+  --shadow-avatar: 0 10px 28px rgba(124, 58, 237, 0.4);
+  --shadow-bubble: 0 12px 30px rgba(0, 0, 0, 0.4);
+  --shadow-success: 0 16px 40px rgba(34, 197, 94, 0.45);
+  --shadow-character: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.55));
+
+  /* Medidas del shell */
+  --topbar-h: 74px;
+  --sidebar-w: 212px;
+}

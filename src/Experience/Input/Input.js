@@ -3,8 +3,11 @@ import Experience from '../Experience.js';
 import { MAP_SIZE } from '../World/mapConfig.js';
 
 const DOUBLE_CLICK_MS = 350;
-const ZOOM_MIN = 0.5;
-const ZOOM_MAX = 3;
+// Exportados porque la barra de zoom del mapa (UI de React) mueve el mismo
+// camera.zoomTarget que la rueda y necesita los mismos topes.
+export const ZOOM_MIN = 0.5;
+export const ZOOM_MAX = 3;
+export const ZOOM_STEP = 0.25;
 const ZOOM_SPEED = 0.0015;
 
 // Raycasting de clicks sobre el canvas: primero prueba contra los NPCs
@@ -29,8 +32,13 @@ export default class Input {
   }
 
   _handlePointerDown(event) {
-    this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    // NDC relativas al canvas, no a la ventana: el canvas ya no ocupa la
+    // pantalla entera (vive en el área de contenido del shell), así que usar
+    // innerWidth/innerHeight desviaría el rayo. Una llamada por click, no por
+    // frame, así que el getBoundingClientRect no cuesta nada (regla 8).
+    const rect = this.canvas.getBoundingClientRect();
+    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     this.raycaster.setFromCamera(this.pointer, this.camera.instance);
 
     // ¿Click sobre un NPC?

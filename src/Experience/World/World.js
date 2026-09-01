@@ -7,6 +7,7 @@ import NpcPopulation from './NpcPopulation.js';
 import ChunkGrid from './ChunkGrid.js';
 import Input from '../Input/Input.js';
 import { DialogUI } from '../UI/DialogUI.js';
+import { getPlayerState, savePlayerState } from './playerState.js';
 
 // Zoom al que se acerca la cámara mientras la tarjeta de diálogo está abierta
 const DIALOG_ZOOM = 1.8;
@@ -17,7 +18,7 @@ export default class World {
     this.camera = this.experience.camera;
     this.resources = this.experience.resources;
 
-    this.dialog = new DialogUI();
+    this.dialog = new DialogUI(this.experience.container ?? document.body);
     // NPC al que el jugador va caminando para hablarle
     this.pendingNPC = null;
     // Zoom que tenía el usuario antes de abrirse el diálogo (null = cerrado)
@@ -40,6 +41,7 @@ export default class World {
       this.npcs = this.population.npcs; // array vivo, mutado por la población
 
       this.camera.setTarget(this.player.group);
+      this.camera.snapZoom(getPlayerState().zoom);
 
       this.input = new Input({
         ground: this.floor.mesh,
@@ -105,5 +107,25 @@ export default class World {
       this.camera.zoomTarget = this._preDialogZoom;
       this._preDialogZoom = null;
     }
+  }
+
+  // La tarjeta de diálogo es DOM propio, fuera de la escena: el traverse
+  // de Experience.destroy no la alcanza.
+  destroy() {
+    // Última parada del jugador antes de que se destruya la escena: al volver
+    // a la pantalla, el mundo se rearma alrededor de este punto en vez del
+    // origen (playerState.js). Puede no haber jugador todavía si se sale
+    // antes de que Resources termine de cargar.
+    if (this.player) {
+      savePlayerState({
+        position: this.player.position,
+        rotationY: this.player.group.rotation.y,
+        // Con el diálogo abierto el zoom vigente es el suyo, no el que eligió
+        // el usuario: se guarda el de antes de abrirlo.
+        zoom: this._preDialogZoom ?? this.camera.zoomTarget,
+      });
+    }
+
+    this.dialog.destroy();
   }
 }

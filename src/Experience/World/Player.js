@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Experience from '../Experience.js';
 import { BODY_MESH_NAME, MODEL_SCALE, loadCharacterConfig, visibleMeshNamesFor } from './characterConfig.js';
+import { getPlayerState } from './playerState.js';
 
 const SPEED = 4.8; // unidades por segundo (-40% para acompasar con la animación)
 const RUN_SPEED = SPEED * 2;
@@ -15,10 +16,19 @@ export default class Player {
     this.time = this.experience.time;
     this.resources = this.experience.resources;
 
+    // Dónde quedó el personaje la última vez que existió esta escena. En un
+    // arranque limpio es el origen; al volver de otra pantalla, el punto en
+    // el que se lo dejó (playerState.js).
+    const saved = getPlayerState();
+
     this.group = new THREE.Group();
-    this.group.position.set(0, REST_HEIGHT, 0);
+    this.group.position.set(saved.x, REST_HEIGHT, saved.z);
+    this.group.rotation.y = saved.rotationY;
     this.scene.add(this.group);
 
+    // El destino arranca siendo la posición actual: se restaura dónde está
+    // parado, no hacia dónde iba. Volver a la pantalla y verlo seguir
+    // caminando solo sería más raro que verlo quieto.
     this.target = this.group.position.clone();
     this._dir = new THREE.Vector3();
 

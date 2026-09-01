@@ -17,7 +17,11 @@ let instance = null;
 // Experience.js (singleton, un solo loop colgado de Time#tick) pero sin el
 // mundo/streaming/NPCs del juego — acá solo hay un personaje en un pedestal.
 export default class CustomizeExperience {
-  constructor(canvas) {
+  // `withPanel:false` + `container` es el modo embebido: la pantalla Avatar de
+  // React dibuja su propio panel editorial y llama a `stage.setSlotOption()`,
+  // así que acá no se monta el panel DOM de CustomizeUI y el tamaño sale del
+  // contenedor del canvas en vez de la ventana.
+  constructor(canvas, { withPanel = true, container = null } = {}) {
     if (instance) {
       return instance;
     }
@@ -28,7 +32,7 @@ export default class CustomizeExperience {
     this.canvas = canvas;
 
     this.debug = new Debug();
-    this.sizes = new Sizes();
+    this.sizes = new Sizes(container);
     this.time = new Time();
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x1a1d24);
@@ -38,7 +42,7 @@ export default class CustomizeExperience {
     // no encima: primero se monta el panel, así el canvas/cámara se dimensionan
     // ya descontando el espacio que ocupa (ver _viewportSize()).
     this.stage = new CharacterStage();
-    this.ui = new CustomizeUI(this.stage);
+    this.ui = withPanel ? new CustomizeUI(this.stage) : null;
 
     this.setCamera();
     this.setLights();
@@ -55,6 +59,9 @@ export default class CustomizeExperience {
   // query en style.css) — así el personaje queda centrado en el área visible
   // en vez de quedar tapado detrás del panel.
   _viewportSize() {
+    // Sin panel DOM, el contenedor que mide Sizes ya es el área visible.
+    if (!this.ui) return { width: this.sizes.width, height: this.sizes.height };
+
     const panelRect = this.ui.panel.getBoundingClientRect();
     const isSidePanel = panelRect.height >= this.sizes.height - 1;
 
@@ -150,5 +157,29 @@ export default class CustomizeExperience {
     this.stage.update();
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  // Mismo contrato que Experience.destroy(): dispose explícito de todo lo que
+  // ocupa memoria de GPU (regla 11) y soltar el singleton, porque React monta
+  // y desmonta esta pantalla varias veces por sesión.
+  destroy() {
+    this.time.stop();
+    this.sizes.destroy();
+    this.controls.dispose();
+
+    this.scene.traverse((child) => {
+      if (!child.isMesh) return;
+      child.geometry.dispose();
+      for (const key in child.material) {
+        const value = child.material[key];
+        if (value && typeof value.dispose === 'function') value.dispose();
+      }
+    });
+
+    this.renderer.dispose();
+    if (this.ui) this.ui.panel.remove();
+
+    instance = null;
+    window.customizeExperience = null;
   }
 }

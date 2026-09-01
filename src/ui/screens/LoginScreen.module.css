@@ -1,0 +1,355 @@
+.screen {
+  display: flex;
+  height: 100%;
+  background: var(--bg-base);
+}
+
+/* ---- Hero ---- */
+
+.hero {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.heroBackdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.heroBackdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/ui/seoul-scene.png') center / cover no-repeat;
+}
+
+.heroBackdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(13, 18, 38, 0.92) 0%,
+    rgba(13, 18, 38, 0.72) 38%,
+    rgba(13, 18, 38, 0.25) 70%,
+    rgba(13, 18, 38, 0.5) 100%
+  );
+}
+
+.heroContent {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 48px 56px;
+  overflow-y: auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.logoAvatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 23px;
+  line-height: 1.05;
+  background: var(--grad-logo);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tagline {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-quaternary);
+}
+
+.heroText {
+  margin-top: auto;
+  padding-top: 40px;
+}
+
+.heroTitle {
+  max-width: 560px;
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 58px;
+  line-height: 1.04;
+}
+
+.gold {
+  color: var(--gold);
+}
+
+.heroLead {
+  max-width: 480px;
+  margin: 0 0 28px;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  max-width: 420px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 15px 17px;
+  border-radius: 16px;
+  background: rgba(20, 28, 50, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(6px);
+}
+
+.featureIcon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.featureTitle {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.featureText {
+  font-size: 13.5px;
+  color: #aab2cc;
+}
+
+/* ---- Formulario ---- */
+
+.formPanel {
+  width: 560px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  padding: 46px 52px;
+  overflow-y: auto;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border-hairline);
+}
+
+.form {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.formAvatar {
+  width: 96px;
+  height: 96px;
+  align-self: center;
+  margin-bottom: 18px;
+  border-radius: 26px;
+  border: 3px solid rgba(155, 107, 255, 0.5);
+  box-shadow: var(--shadow-avatar);
+  object-fit: cover;
+}
+
+.formTitle {
+  margin: 0 0 6px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 32px;
+}
+
+.formSubtitle {
+  margin: 0 0 26px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--text-tertiary);
+}
+
+.label {
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  height: 50px;
+  margin-bottom: 16px;
+  padding: 0 15px;
+  border-radius: var(--r-lg);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  color: #7e88a6;
+  transition: border-color 0.15s ease;
+}
+
+.field:focus-within {
+  border-color: rgba(155, 107, 255, 0.55);
+}
+
+.field input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 15px;
+}
+
+.field input::placeholder {
+  color: var(--text-disabled);
+}
+
+.password {
+  letter-spacing: 2px;
+}
+
+.eye {
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.eye:hover {
+  color: var(--text-primary);
+}
+
+.forgot {
+  align-self: flex-end;
+  margin-bottom: 20px;
+  background: none;
+  border: none;
+  color: var(--lavender-text);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.forgot:hover {
+  text-decoration: underline;
+}
+
+.submit {
+  height: 52px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 0;
+  font-size: 13px;
+  color: var(--text-disabled);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.socials {
+  display: flex;
+  gap: 12px;
+}
+
+.social {
+  flex: 1;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-lg);
+  background: #1a2238;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.15s ease;
+}
+
+.social:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+
+.footer {
+  margin: 26px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+
+.footerLink {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--lavender-text);
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+}
+
+/* El hero es decorativo: en pantallas angostas se va y queda el formulario,
+   que es lo único accionable. */
+@media (max-width: 1100px) {
+  .heroTitle {
+    font-size: 44px;
+  }
+
+  .formPanel {
+    width: 460px;
+    padding: 40px 36px;
+  }
+}
+
+@media (max-width: 860px) {
+  .hero {
+    display: none;
+  }
+
+  .formPanel {
+    width: 100%;
+    border-left: none;
+  }
+}

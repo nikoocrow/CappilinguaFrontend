@@ -12,8 +12,9 @@ export default class Time extends EventEmitter {
     this.current = this.start;
     this.elapsed = 0;
     this.delta = 1 / 60;
+    this._stopped = false;
 
-    window.requestAnimationFrame(() => {
+    this._raf = window.requestAnimationFrame(() => {
       this.tick();
     });
   }
@@ -26,8 +27,19 @@ export default class Time extends EventEmitter {
 
     this.trigger('tick');
 
-    window.requestAnimationFrame(() => {
+    if (this._stopped) return;
+
+    this._raf = window.requestAnimationFrame(() => {
       this.tick();
     });
+  }
+
+  // El loop ya no vive lo que vive la pestaña: al salir de la pantalla del
+  // mapa/avatar React desmonta la Experience y hay que cortar el rAF, o
+  // seguiría renderizando (y acumulando loops al volver a entrar).
+  stop() {
+    this._stopped = true;
+    window.cancelAnimationFrame(this._raf);
+    this.off('tick');
   }
 }

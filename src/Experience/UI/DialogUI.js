@@ -3,13 +3,21 @@
 // la elección de opciones con feedback de acierto/error.
 
 export class DialogUI {
-  constructor() {
+  // `host` es el elemento sobre el que flota la tarjeta. Dentro del shell de
+  // React es el contenedor del canvas (el área de juego no es la ventana
+  // entera); en las páginas vanilla sigue siendo el body.
+  constructor(host = document.body) {
+    this.host = host;
     this.panel = document.createElement('div');
     this.panel.id = 'dialog';
     this.panel.hidden = true;
     this.panel.innerHTML = `
       <div class="dialog-header">
-        <span class="dialog-name"></span>
+        <span class="dialog-avatar"></span>
+        <span class="dialog-who">
+          <span class="dialog-eyebrow">CONVERSACIÓN</span>
+          <span class="dialog-name"></span>
+        </span>
         <button class="dialog-close" type="button" aria-label="Cerrar">×</button>
       </div>
       <p class="dialog-response"></p>
@@ -18,8 +26,9 @@ export class DialogUI {
       <div class="dialog-options"></div>
       <button class="dialog-retry" type="button" hidden>Practicar otra vez</button>
     `;
-    document.body.appendChild(this.panel);
+    this.host.appendChild(this.panel);
 
+    this.avatarEl = this.panel.querySelector('.dialog-avatar');
     this.nameEl = this.panel.querySelector('.dialog-name');
     this.responseEl = this.panel.querySelector('.dialog-response');
     this.feedbackEl = this.panel.querySelector('.dialog-feedback');
@@ -41,6 +50,7 @@ export class DialogUI {
     this.npc = npc;
     const dialog = npc.dialog;
 
+    this.avatarEl.textContent = npc.name.charAt(0).toUpperCase();
     this.nameEl.textContent = npc.name;
     this.responseEl.textContent = dialog.npcLine;
     this.promptEl.textContent = dialog.prompt;
@@ -82,6 +92,13 @@ export class DialogUI {
 
   close() {
     this.panel.hidden = true;
+    this.npc = null;
+  }
+
+  // El panel es DOM fuera del árbol de three.js: si no se saca a mano, cada
+  // montaje de la pantalla del juego deja una tarjeta huérfana en el documento.
+  destroy() {
+    this.panel.remove();
     this.npc = null;
   }
 }

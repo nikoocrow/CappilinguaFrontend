@@ -47,6 +47,20 @@ export default class Camera {
   // solo se traslada, nunca rota, así la vista isométrica se mantiene.
   setTarget(object3D) {
     this._target = object3D;
+    // Saltar de una al objetivo en vez de interpolar: si el jugador arranca
+    // lejos del origen (posición restaurada al volver a la pantalla), sin
+    // esto la cámara haría un viaje de un segundo hasta alcanzarlo.
+    this._desired.copy(object3D.position).setY(0).add(this._offset);
+    this.instance.position.copy(this._desired);
+  }
+
+  // Zoom sin interpolación, por el mismo motivo que el salto de setTarget:
+  // tocar solo `zoomTarget` al restaurar haría que la cámara se acercara sola
+  // durante el primer segundo de la escena.
+  snapZoom(value) {
+    this.zoomTarget = value;
+    this.instance.zoom = value;
+    this.instance.updateProjectionMatrix();
   }
 
   resize() {

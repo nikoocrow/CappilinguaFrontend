@@ -130,6 +130,135 @@ Un `ChunkManager` (o nombre equivalente) viviría junto a `World`, escuchando `t
 ### Orden de implementación sugerido
 No construir todo el sistema de una vez. Camino incremental: (1) grilla fija de celdas con carga síncrona simple (3×3 celdas alrededor del jugador, sin transición), (2) pasar esa carga a asíncrona con cola, (3) separar capa lógica (spawn de NPCs) de la visual, (4) recién ahí sumar instancing y LOD cuando el contenido por chunk sea denso. Cada paso es útil por sí solo y no exige rehacer el anterior.
 
+## Capa de UI en React
+
+La interfaz del módulo de aprendizaje (barra superior, sidebar, inicio, mapa, misiones, lección,
+vocabulario, avatar) está implementada en **React** sobre el mismo Vite, en `src/ui/`. El shell de
+React es la app: `src/index.html` → `src/main.jsx` → `src/ui/App.jsx` (rutas con `react-router-dom`).
+Las Experiences de three.js se montan **dentro** del área de contenido del shell, no al revés.
+
+Hay exactamente **dos canvas** y ninguno es de pantalla completa:
+
+- **Inicio** (`/inicio`, `HomeScreen`, rotulado **Simulación** en el sidebar) — el mundo jugable:
+  `Experience` con su streaming de chunks, NPCs y `DialogUI`. Es la pantalla por defecto.
+- **Avatar** (`/avatar`, `AvatarScreen`) — `CustomizeExperience` en modo embebido, con el panel
+  editorial dibujado por React.
+
+El **Login** (`/login`, `LoginScreen`) queda **fuera** del `<Shell>` —ocupa el lienzo completo, sin
+barra superior ni sidebar— y todavía no es la pantalla de entrada, porque no hay sesión real: la app
+arranca en Inicio y al login se llega por un atajo **temporal** en el botón de Ajustes (`TopBar.jsx`
+y `Sidebar.jsx`, ambos marcados con `TEMPORAL`). Al implementar Ajustes de verdad, ese atajo se saca
+y el login pasa a ser la ruta inicial.
+
+El **Mapa** (`/mapa`) no lleva canvas: es la imagen de Seúl (`static/ui/seoul-map-v3.png`) con los
+pines como overlay HTML. La imagen y los pines viven en el mismo contenedor escalado y cada pin se
+contra-escala con `scale(1/z)` desde `bottom center` — escalar solo la imagen los desincronizaría.
+
+```
+src/ui/
+├── App.jsx            → rutas
+├── state/AppState.jsx → sesión y economía (wones, gemas, XP, nivel, misiones reclamadas,
+│                        artículos comprados, clases reservadas, toast)
+├── state/ImmersiveMode.jsx → modo inmersivo del mundo 3D (tecla "i")
+├── anim/              → gsap.js (config única) + hooks.js (entradas, contadores, pop-in)
+├── styles/            → tokens.css (design tokens del handoff) + base.css (reset, keyframes)
+├── components/        → shell (TopBar, Sidebar), primitivas (Button, ProgressBar, Toast),
+│                        íconos SVG, y los wrappers GameCanvas / AvatarCanvas
+├── screens/           → una pantalla por ruta
+└── data/              → fixtures (lugares, misiones, preguntas, vocabulario, tienda, clases)
+```
+
+`src/game.html` y `src/customize.html` siguen existiendo como páginas vanilla sueltas: sirven para
+depurar el 3D sin el shell y no dependen de React.
+
+### 26. Un componente de React no maneja el loop de render
+`GameCanvas` y `AvatarCanvas` solo crean la Experience en un `useEffect` (una vez, sin deps) y la
+destruyen en el cleanup. No hay `requestAnimationFrame` en React ni estado de React actualizándose
+por frame — la regla 1 sigue valiendo: el loop es `Time#tick`. Si una pantalla necesita leer algo
+del motor (el zoom del mapa), lo hace en un handler de evento, nunca en un render.
+
+### 27. Montar/desmontar tiene que ser simétrico
+Las Experiences son singletons de módulo. Como React monta y desmonta las pantallas 3D varias veces
+por sesión, `destroy()` ahora también corta el rAF (`Time.stop()`), desconecta el `ResizeObserver`
+(`Sizes.destroy()`) y **suelta el singleton** (`instance = null`). Sin eso, volver a entrar al mapa
+devolvería una Experience ya destruida. Cualquier orquestador nuevo debe cerrar el mismo ciclo.
+
+Como corolario: si el mundo se destruye entero al navegar, lo que deba sobrevivir hay que guardarlo
+explícitamente. `World/playerState.js` conserva posición, rotación y zoom entre montajes —lo escribe
+`World.destroy()`, lo lee el constructor de `Player`— para que ir a Avatar y volver no reinicie al
+personaje en el origen. Es estado de sesión en memoria del módulo, no `localStorage`: recargar la
+página empieza de cero a propósito (distinto de `characterConfig`, que sí es una preferencia
+persistida). `Camera.setTarget()` y `Camera.snapZoom()` saltan sin interpolar por el mismo motivo —
+con la posición restaurada lejos del origen, interpolar sería un viaje de cámara de un segundo al
+entrar. Cualquier estado nuevo que el jugador perciba como "lo que estaba haciendo" (misión activa,
+NPC a medias) sigue el mismo camino.
+
+### 28. El canvas mide su contenedor, no la ventana
+`Sizes` acepta un elemento: dentro del shell el canvas ocupa el área de contenido (menos barra
+superior y sidebar), que puede cambiar de tamaño sin que la ventana lo haga, por eso ahí usa
+`ResizeObserver`. Como consecuencia, `Input` calcula las coordenadas NDC contra
+`canvas.getBoundingClientRect()` y no contra `window.innerWidth/innerHeight`. Nada de código nuevo
+debería asumir que el canvas es la pantalla entera.
+
+### 29. Los tokens de diseño son la fuente única de color/tipografía
+Todo valor visual del handoff vive en `src/ui/styles/tokens.css` como custom property. Los
+componentes usan CSS Modules y `var(--…)`; no se escriben hex a mano en un `.module.css`. La
+variante de botón primario está fijada al **estilo B** (plano) del handoff — el toggle A/B del
+prototipo no se portó.
+
+### 30. La UI del juego que ya estaba en DOM sigue en DOM
+`DialogUI.js` (la tarjeta de diálogo con los NPCs) sigue siendo DOM plano con estilos de
+`style.css`, superpuesta al canvas dentro de la pantalla del mapa. No se reescribió en React: la
+regla 10 se cumple igual y así el juego sigue funcionando sin el shell en `game.html`. Para que se
+vea como el resto de la interfaz, `style.css` importa `ui/styles/tokens.css` — así las páginas
+vanilla también tienen las variables. La tarjeta se monta en `experience.container` (no en el
+`body`) y se saca en `World.destroy()`: es DOM propio, el traverse de `Experience.destroy` no la
+alcanza.
+
+### 31. El chrome se oculta desmontándose, no con `display:none`
+En Inicio el shell entra en modo inmersivo (`state/ImmersiveMode.jsx`): barra superior, sidebar y
+overlays del HUD se **desmontan** para que el área de contenido crezca de verdad y el
+`ResizeObserver` de `Sizes` redimensione el canvas (regla 28). Esconderlos con CSS dejaría el canvas
+del tamaño anterior. `/avatar` queda fuera del modo a propósito: ahí la interfaz es la pantalla.
+
+El desmontaje **espera al fundido**, pero el cambio de layout **no**. `useReveal` (`anim/hooks.js`)
+mantiene el chrome montado durante una fase `leaving` mientras GSAP lo funde, y recién desmonta en
+el `onComplete`; en esa fase las ranuras del shell pasan a `position:absolute` en las coordenadas
+que ya ocupaban, así el área de contenido colapsa de una sola vez —un solo resize del canvas, al
+principio del gesto— y la salida corre por encima del juego. Redimensionar el canvas a lo largo de
+la transición reasignaría el drawing buffer en cada frame. Cada nodo declara su dirección con un
+atributo (`data-chrome="top"`, `data-hud="bottom"`); el nombre del atributo es parámetro porque los
+scopes se anidan —el shell contiene a las pantallas— y un `querySelectorAll` de arriba capturaría
+los nodos de abajo.
+
+### 32. Las mutaciones de economía viven en `AppState`, no en las pantallas
+Comprar en la tienda (`buyItem`/`buyPack`) y reservar una clase (`reserveClass`) descuentan saldo y
+devuelven un resultado (`ok`/`owned`/`insufficient`); la pantalla solo elige el texto del toast. El
+saldo se lee dentro del updater de `setState`, no de la clausura, para que dos clicks seguidos no
+gasten dos veces sobre el mismo saldo viejo — mismo patrón que `claimMission`.
+
+### 33. GSAP anima la UI de React; el motor 3D no lo toca
+Las animaciones de interfaz (entradas de pantalla, cambios de valor, overlays) están en
+`src/ui/anim/`. Reglas de convivencia:
+
+- **GSAP se lleva las secuencias, CSS se queda con los estados.** Entradas, escalonados y cambios de
+  valor son GSAP; hover, focus y press siguen siendo `transition` en los `.module.css`. Ninguna
+  propiedad puede estar animada por los dos a la vez — por eso `ProgressBar` perdió su
+  `transition: width` al pasar el ancho a GSAP.
+- **Esto rompe la regla 1 a propósito, pero solo para DOM.** GSAP tiene su propio ticker de `rAF`,
+  que idlea cuando no hay tweens activos y nunca toca la escena de three.js. El loop del motor sigue
+  siendo `Time#tick`: nada de animar la cámara, el jugador o los chunks con GSAP.
+- **Nada de estado de React por frame** (regla 26). Los contadores de la barra superior interpolan
+  escribiendo `textContent` sobre un ref (`useTweenedNumber`), no con `setState` en cada `onUpdate`.
+- **Todo tween vive en un `gsap.context` con `revert()` en el cleanup** (`useGsapScope`). Desmontar
+  una pantalla a mitad de su entrada no puede dejar nodos con `opacity:0` inline.
+- **El marcado declara qué se anima** con `data-anim="head"` / `data-anim="item"`, porque los nombres
+  de clase de CSS Modules son hasheados y no sirven como selectores.
+- **`prefers-reduced-motion` se consulta en JS**: el media query de `base.css` no alcanza a los
+  tweens, así que cada hook salta al estado final cuando está activo.
+- **No animar transforms que ya son de otro sistema**: los pines del mapa se contra-escalan con
+  `scale(1/zoom)` y quedan explícitamente fuera de la entrada de esa pantalla.
+
 ## Cuándo romper una regla
 
 Estas reglas son defaults, no dogma. Si una feature nueva justifica romper una (por ejemplo, una segunda luz con sombra para un efecto puntual), documentar el motivo en un comentario corto junto al código, igual que ya se hace en `Environment.js` y `Sizes.js` — la razón importa más que la regla.

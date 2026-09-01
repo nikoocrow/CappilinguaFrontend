@@ -1,0 +1,63 @@
+.card {
+  width: 318px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--r-2xl);
+  background: rgba(12, 18, 34, 0.92);
+  border: 1px solid rgba(155, 107, 255, 0.28);
+  backdrop-filter: blur(8px);
+  text-align: left;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(155, 107, 255, 0.5);
+}
+
+.emoji {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(245, 196, 81, 0.16);
+  font-size: 22px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  color: var(--lavender-text);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.rewards {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.rewards span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}

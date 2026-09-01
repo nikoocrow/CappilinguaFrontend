@@ -1,0 +1,6 @@
+/* Ocupa exactamente el área de contenido: las pantallas se posicionan contra
+   esta capa igual que lo hacían contra <main>. */
+.layer {
+  position: absolute;
+  inset: 0;
+}

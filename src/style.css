@@ -1,3 +1,9 @@
+/* Los tokens del handoff son la fuente de color/tipografía también acá: la
+   tarjeta de diálogo con los NPCs es DOM plano (regla 30) pero tiene que verse
+   como el resto de la interfaz. El @import hace que game.html y
+   customize.html —que no cargan el shell de React— igual tengan las variables. */
+@import './ui/styles/tokens.css';
+
 html,
 body {
   margin: 0;
@@ -208,141 +214,235 @@ canvas.webgl {
 
 /* ---------- Diálogo con NPC ---------- */
 
+/* Misma familia visual que las tarjetas del shell (MissionCard/paneles):
+   fondo azul profundo translúcido, borde lavanda tenue y blur. Se posiciona
+   contra el contenedor del canvas, no contra la ventana, porque dentro del
+   shell el área de juego no es la pantalla entera. */
 #dialog {
   position: absolute;
   left: 50%;
-  bottom: 24px;
+  bottom: 28px;
   transform: translateX(-50%);
-  width: min(520px, calc(100vw - 32px));
+  z-index: 20;
+  width: min(560px, calc(100% - 32px));
   box-sizing: border-box;
-  background: rgba(26, 29, 36, 0.92);
-  border: 1px solid #4c566a;
-  border-radius: 14px;
-  padding: 14px 16px;
-  color: #eceff4;
-  font-family: system-ui, sans-serif;
-  backdrop-filter: blur(6px);
+  padding: 18px 20px 20px;
+  border-radius: var(--r-2xl);
+  background: rgba(12, 18, 34, 0.94);
+  border: 1px solid rgba(155, 107, 255, 0.28);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(10px);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  animation: dialogIn 0.22s ease both;
+}
+
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
 .dialog-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* Inicial del NPC en vez de un emoji fijo: sale del dato, no del markup. */
+.dialog-avatar {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--grad-primary);
+  border: 2px solid var(--lavender);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 19px;
+  color: #fff;
+}
+
+.dialog-who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dialog-eyebrow {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  color: var(--lavender-text);
 }
 
 .dialog-name {
-  font-weight: 700;
-  font-size: 15px;
-  color: #a3be8c;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--text-primary);
 }
 
 .dialog-close {
-  background: none;
-  border: none;
-  color: #8892a6;
-  font-size: 20px;
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: var(--surface-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--text-tertiary);
+  font-size: 18px;
   line-height: 1;
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
 .dialog-close:hover {
-  color: #eceff4;
-  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
+/* La línea del NPC es lo que el jugador tiene que leer: es la tipografía
+   más grande de la tarjeta. */
 .dialog-response {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   min-height: 1.4em;
-  font-size: 15px;
-  line-height: 1.4;
-  color: #eceff4;
+  padding: 12px 14px;
+  border-radius: var(--r-lg);
+  background: var(--bg-capsule);
+  border: 1px solid var(--border-hairline);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--text-primary);
 }
 
 .dialog-prompt {
-  margin: 0 0 8px;
-  font-size: 13px;
-  color: #8892a6;
+  margin: 0 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--text-quaternary);
 }
 
 .dialog-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 9px;
 }
 
+/* Mismo registro que el botón "ghost" del shell. */
 .dialog-option {
-  background: #3b4252;
-  border: 1px solid #4c566a;
-  color: #d8dee9;
-  font-size: 14px;
-  font-family: inherit;
-  padding: 8px 14px;
-  border-radius: 999px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 11px 16px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: transform 0.12s ease, filter 0.12s ease, border-color 0.15s ease;
 }
 
-.dialog-option:hover {
-  background: #434c5e;
-  border-color: #81a1c1;
+.dialog-option:hover:not(:disabled) {
+  filter: brightness(1.18);
+  border-color: rgba(155, 107, 255, 0.45);
+  transform: translateY(-2px);
 }
 
 .dialog-option:disabled {
   cursor: default;
-  opacity: 0.85;
+  transform: none;
+  opacity: 0.9;
 }
 
 .dialog-option.correct {
-  background: rgba(163, 190, 140, 0.25);
-  border-color: #a3be8c;
-  color: #a3be8c;
+  background: rgba(34, 197, 94, 0.18);
+  border-color: rgba(34, 197, 94, 0.55);
+  color: var(--success-light);
   opacity: 1;
 }
 
 .dialog-option.incorrect {
-  background: rgba(191, 97, 106, 0.18);
-  border-color: #bf616a;
-  color: #bf616a;
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: var(--error-light);
   text-decoration: line-through;
 }
 
 /* ---------- Feedback del ejercicio ---------- */
 
 .dialog-feedback {
-  margin: 0 0 12px;
-  padding: 8px 12px;
-  border-radius: 8px;
+  margin: 0 0 14px;
+  padding: 10px 13px;
+  border-radius: var(--r-md);
   font-size: 14px;
+  font-weight: 600;
   line-height: 1.4;
 }
 
 .dialog-feedback.ok {
-  background: rgba(163, 190, 140, 0.15);
-  border: 1px solid rgba(163, 190, 140, 0.5);
-  color: #a3be8c;
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  color: var(--success-light);
 }
 
 .dialog-feedback.error {
-  background: rgba(191, 97, 106, 0.12);
-  border: 1px solid rgba(191, 97, 106, 0.5);
-  color: #d08a91;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: var(--error-light);
 }
 
+/* Primaria plana (estilo B del handoff), igual que <Button variant="primary">. */
 .dialog-retry {
-  margin-top: 12px;
-  background: #5e81ac;
-  border: 1px solid #81a1c1;
-  color: #eceff4;
+  margin-top: 14px;
+  height: 42px;
+  padding: 0 20px;
+  background: var(--purple);
+  border: 2px solid var(--lavender);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-primary-b);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: 14px;
-  font-family: inherit;
-  padding: 8px 16px;
-  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease;
 }
 
 .dialog-retry:hover {
-  background: #6b8cb8;
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.dialog-retry:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 560px) {
+  #dialog {
+    bottom: 16px;
+    padding: 15px 16px 17px;
+  }
+
+  .dialog-response {
+    font-size: 15.5px;
+  }
 }

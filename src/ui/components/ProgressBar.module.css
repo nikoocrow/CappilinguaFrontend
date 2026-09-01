@@ -1,0 +1,12 @@
+.track {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: inherit;
+  /* El ancho lo anima GSAP (ProgressBar.jsx): sin `transition` acá para que
+     no se peleen por la misma propiedad. */
+}

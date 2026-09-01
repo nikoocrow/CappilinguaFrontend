@@ -1,0 +1,21 @@
+.layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 34px;
+  z-index: 80;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 14px 24px;
+  border-radius: 14px;
+  background: #1a2238;
+  border: 1px solid rgba(155, 107, 255, 0.4);
+  box-shadow: var(--shadow-panel);
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+}

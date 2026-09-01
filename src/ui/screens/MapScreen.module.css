@@ -1,0 +1,420 @@
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #080c18;
+}
+
+/* El mapa y los pines viven en el mismo contenedor escalado: escalar solo la
+   imagen desincronizaría los pines de sus lugares. */
+.viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.scaled {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.mapImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Velos: funden la escena 3D con el chrome oscuro de la app arriba y abajo */
+.veilTop,
+.veilBottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.veilTop {
+  top: 0;
+  height: 140px;
+  background: linear-gradient(180deg, #080c18, transparent);
+}
+
+.veilBottom {
+  bottom: 0;
+  height: 95px;
+  background: linear-gradient(0deg, #080c18, transparent);
+}
+
+/* ---- Buscador y chips ---- */
+.topLeft {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 360px;
+  height: 48px;
+  padding: 0 8px 0 14px;
+  border-radius: var(--r-lg);
+  background: rgba(12, 18, 34, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+  color: #7e88a6;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 14.5px;
+}
+
+.searchDivider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-default);
+}
+
+.searchAction {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 10px;
+  background: var(--grad-primary);
+  color: #fff;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 520px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  background: rgba(12, 18, 34, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cfd5e8;
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: filter 0.15s ease;
+}
+
+.chip:hover {
+  filter: brightness(1.15);
+}
+
+.chipActive {
+  background: var(--grad-primary);
+  border-color: rgba(155, 107, 255, 0.55);
+  color: #fff;
+}
+
+.chipDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ---- Insignia de ciudad ---- */
+.cityBadge {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 14px;
+  border-radius: var(--r-lg);
+  background: rgba(12, 18, 34, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  color: var(--text-tertiary);
+}
+
+.flag {
+  font-size: 20px;
+}
+
+.cityName {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
+.cityMeta {
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+}
+
+/* ---- Tarjeta de misión (componente compartido: acá solo su posición) ---- */
+.missionSlot {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  z-index: 10;
+}
+
+/* ---- Pines teardrop ---- */
+/* El botón hace de ancla: se posiciona en su punto y aplica la contra-escala
+   scale(1/z) desde `bottom center`, para que el pin conserve su tamaño en
+   pantalla mientras la punta sigue clavada en el mismo lugar del mapa. La
+   forma va aparte porque el hover/selección tienen que poder animarse sin
+   pisar la contra-escala, que viene por estilo inline. */
+.pin {
+  position: absolute;
+  z-index: 8;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: none;
+  transform-origin: bottom center;
+}
+
+.pinShape {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--pin-color);
+  border: 2.5px solid rgba(238, 241, 251, 0.85);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.pin:hover .pinShape {
+  transform: rotate(-45deg) scale(1.03) translate(2px, -2px);
+}
+
+.pinSelected {
+  z-index: 12;
+}
+
+.pinSelected .pinShape {
+  border-color: #eef1fb;
+  transform: rotate(-45deg) scale(1.18);
+  box-shadow: 0 0 0 5px var(--pin-halo), 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.pinGlyph {
+  /* Contra-rotación para que el glifo quede derecho dentro del teardrop */
+  transform: rotate(45deg);
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ---- Barra de controles ---- */
+.dock {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 14px;
+  background: rgba(12, 18, 34, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  color: #cfd5e8;
+}
+
+.dockButton {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+
+.dockButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dockButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.dockDivider {
+  width: 1px;
+  height: 22px;
+  background: var(--border-default);
+  margin: 0 4px;
+}
+
+.zoomValue {
+  min-width: 48px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13.5px;
+}
+
+.compass {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+}
+
+.compassNeedle {
+  position: absolute;
+  top: 8px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 11px solid var(--pin);
+}
+
+.compassN {
+  position: absolute;
+  bottom: 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 11px;
+}
+
+/* ---- Ficha del lugar ---- */
+.sheet {
+  position: absolute;
+  bottom: 22px;
+  left: 20px;
+  z-index: 10;
+  width: 390px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 18px;
+  border-radius: var(--r-2xl);
+  background: rgba(12, 18, 34, 0.94);
+  border: 1px solid rgba(155, 107, 255, 0.28);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.55);
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sheetName {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 21px;
+  margin: 0;
+}
+
+.sheetKorean {
+  font-size: 12.5px;
+  color: var(--text-quaternary);
+}
+
+.sheetStars {
+  flex-shrink: 0;
+  padding: 5px 11px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.sheetCategory {
+  align-self: flex-start;
+  padding: 4px 11px;
+  border-radius: var(--r-xs);
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.sheetDescription {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+.sheetProgress {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.sheetPercent {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.sheetActions {
+  display: flex;
+  gap: 10px;
+}
+
+.lockedButton {
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.lockedButton:hover {
+  transform: none;
+}
+
+@media (max-width: 900px) {
+  .missionSlot,
+  .cityBadge {
+    display: none;
+  }
+  .sheet {
+    width: auto;
+    right: 20px;
+  }
+  .search {
+    width: 260px;
+  }
+}

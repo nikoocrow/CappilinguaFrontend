@@ -1,0 +1,13 @@
+/* El canvas llena su contenedor (no la ventana, como en las páginas vanilla).
+   `display:block` evita la línea base de texto que dejaría una franja. */
+.container {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+}

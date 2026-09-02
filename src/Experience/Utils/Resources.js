@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import EventEmitter from './EventEmitter.js';
 
@@ -22,7 +23,15 @@ export default class Resources extends EventEmitter {
 
   setLoaders() {
     this.loaders = {};
+
+    // Decoder de Draco servido como estático (copiado de
+    // three/examples/jsm/libs/draco/gltf/) para los .glb exportados con
+    // compresión de geometría, como vehicles.glb.
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('/draco/');
+
     this.loaders.gltfLoader = new GLTFLoader();
+    this.loaders.gltfLoader.setDRACOLoader(dracoLoader);
     this.loaders.fbxLoader = new FBXLoader();
     this.loaders.textureLoader = new THREE.TextureLoader();
     this.loaders.cubeTextureLoader = new THREE.CubeTextureLoader();

@@ -75,7 +75,7 @@ export default class Experience {
       }
     });
 
-    this.renderer.instance.dispose();
+    this.renderer.destroy();
 
     this.world.destroy();
 

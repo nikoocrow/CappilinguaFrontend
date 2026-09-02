@@ -13,4 +13,14 @@ export default [
     type: 'fbx',
     path: '/characters/animations/Running.fbx',
   },
+  {
+    name: 'roadTiles',
+    type: 'gltfModel',
+    path: '/city/streets/road_tiles_textured.glb',
+  },
+  {
+    name: 'vehicles',
+    type: 'gltfModel',
+    path: '/city/vehicles.glb',
+  },
 ];

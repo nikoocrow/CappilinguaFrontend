@@ -26,6 +26,16 @@ export default class ChunkGrid {
     this._playerCx = null;
     this._playerCz = null;
     this._cell = { cx: 0, cz: 0 }; // scratch reusado por frame (regla 2)
+    this._tilesVisible = true;
+  }
+
+  // Toggle de debug (ver World.js): oculta/muestra los tiles ya cargados y
+  // deja la preferencia guardada para los que se carguen después, ya que
+  // ChunkGrid crea y destruye Chunks todo el tiempo según por dónde camina
+  // el jugador -- no alcanza con tocar solo los que existen ahora.
+  setTilesVisible(visible) {
+    this._tilesVisible = visible;
+    for (const chunk of this.chunks.values()) chunk.group.visible = visible;
   }
 
   update(playerPosition, dt) {
@@ -60,6 +70,7 @@ export default class ChunkGrid {
       if (this.chunks.has(key)) continue;
       const [cx, cz] = key.split(',').map(Number);
       const chunk = new Chunk(cx, cz, chunkCenter(cx, cz));
+      chunk.group.visible = this._tilesVisible;
       this.scene.add(chunk.group);
       this.chunks.set(key, chunk);
       this.onChunkLoaded?.(cx, cz);

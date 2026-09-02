@@ -1,9 +1,15 @@
 import * as THREE from 'three';
+import Experience from '../Experience.js';
 import { CHUNK_SIZE } from './mapConfig.js';
 
 const FADE_SPEED = 3; // opacidad por segundo: ~0.33s para aparecer/desaparecer
 const BASE_COLOR = 0x3b4252;
 const ACTIVE_COLOR = 0x88c0d0;
+// Y del plano del tile: por encima de Floor.js (Y=0) para no z-fightear con
+// el piso base, y un pelo por debajo del asfalto (ver ROAD_SURFACE_DROP en
+// RoadNetwork.js, que lee este mismo valor) para no z-fightear con la
+// calle tampoco -- antes coincidían exactos, ahí empezó el parpadeo.
+export const TILE_Y = 0.008;
 
 // Geometría/material compartidos a nivel de módulo (regla 3 del system
 // design): un plano un poco más chico que la celda para que quede un
@@ -61,7 +67,7 @@ export default class Chunk {
     this._removing = false;
 
     this.group = new THREE.Group();
-    this.group.position.set(center.x, 0.015, center.z);
+    this.group.position.set(center.x, TILE_Y, center.z);
 
     this.mesh = new THREE.Mesh(geometry, material.clone());
     this.mesh.material.opacity = 0;
@@ -69,15 +75,23 @@ export default class Chunk {
     this.mesh.receiveShadow = true;
     this.group.add(this.mesh);
 
-    this.label = new THREE.Sprite(
-      new THREE.SpriteMaterial({ map: labelTexture(cx, cz), transparent: true, opacity: 0 })
-    );
-    this.label.position.y = 0.6;
-    this.group.add(this.label);
+    // La etiqueta de coordenadas es una ayuda de debug para validar el
+    // mecanismo de streaming (regla 12 del system-design: instrumentos de
+    // debug cuelgan de Debug.active), no contenido real -- un jugador
+    // normal no la necesita, y cada una es un draw call de sprite más por
+    // chunk cargado (hasta 9 con LOAD_RADIUS=1).
+    this.label = null;
+    if (new Experience().debug.active) {
+      this.label = new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: labelTexture(cx, cz), transparent: true, opacity: 0 })
+      );
+      this.label.position.y = 0.6;
+      this.group.add(this.label);
+    }
 
     // Los chunks nunca se mueven después de crearse (solo cambia la opacidad
     // de sus materiales): congelar las matrices evita recomponerlas por frame.
-    for (const object of [this.group, this.mesh, this.label]) {
+    for (const object of [this.group, this.mesh, this.label].filter(Boolean)) {
       object.updateMatrix();
       object.matrixAutoUpdate = false;
     }
@@ -107,7 +121,7 @@ export default class Chunk {
 
     this._opacity = THREE.MathUtils.clamp(this._opacity + Math.sign(target - this._opacity) * FADE_SPEED * dt, 0, 1);
     this.mesh.material.opacity = this._opacity * 0.85;
-    this.label.material.opacity = this._opacity;
+    if (this.label) this.label.material.opacity = this._opacity;
     return this._removing && this._opacity <= 0;
   }
 
@@ -115,6 +129,6 @@ export default class Chunk {
   // la textura del label son compartidas/cacheadas y no se tocan.
   dispose() {
     this.mesh.material.dispose();
-    this.label.material.dispose();
+    if (this.label) this.label.material.dispose();
   }
 }

@@ -97,6 +97,16 @@ export default class Player {
     this.currentAction = next;
   }
 
+  // Corrige la animación a idle desde afuera, sin mover al personaje --
+  // World la llama cuando algo externo (un auto) frenó en seco el avance
+  // de este frame: update() decide caminar/correr mirando la distancia al
+  // target, no lo que realmente se desplazó, así que si un auto bloquea
+  // todo el paso la animación queda mostrando caminar sin moverse. No-op
+  // si ya está en idle (mismo guard que _setState).
+  forceIdle() {
+    this._setState('idle');
+  }
+
   update() {
     const dt = this.time.delta;
 

@@ -13,4 +13,12 @@ export default [
     type: 'fbx',
     path: '/characters/animations/Running.fbx',
   },
+  // Blockout de Blender (calle de prueba): el .glb trae sus texturas
+  // embebidas (piso incluido), GLTFLoader las carga solas, sin fuentes
+  // sueltas que declarar acá.
+  {
+    name: 'streetBlockout',
+    type: 'gltfModel',
+    path: '/gbls/seul-street-4.glb',
+  },
 ];

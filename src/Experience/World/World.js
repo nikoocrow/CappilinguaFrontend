@@ -1,6 +1,7 @@
 import Experience from '../Experience.js';
 import Environment from './Environment.js';
 import Floor from './Floor.js';
+import Street from './Street.js';
 import Player from './Player.js';
 import TargetMarker from './TargetMarker.js';
 import NpcPopulation from './NpcPopulation.js';
@@ -27,6 +28,7 @@ export default class World {
     this.resources.on('ready', () => {
       this.environment = new Environment();
       this.floor = new Floor();
+      this.street = new Street();
 
       // Los NPCs viven asociados a las tiles: cada celda que entra al radio
       // de carga spawnea sus NPCs (npcSpawns.js) y los despawnea al salir.
@@ -36,7 +38,7 @@ export default class World {
         onChunkUnloaded: (cx, cz) => this.population.despawnChunk(cx, cz),
       });
 
-      this.player = new Player();
+      this.player = new Player({ colliders: this.street.colliders });
       this.marker = new TargetMarker();
       this.npcs = this.population.npcs; // array vivo, mutado por la población
 
@@ -83,6 +85,7 @@ export default class World {
 
     this.player.update();
     this.marker.update();
+    this.input.update();
     this.chunkGrid.update(this.player.position, this.experience.time.delta);
     for (const npc of this.npcs) npc.update(this.player.position);
 
@@ -127,5 +130,8 @@ export default class World {
     }
 
     this.dialog.destroy();
+    // Input.destroy() saca sus listeners de window (Q/E), que si no
+    // quedarían vivos después de que el canvas ya se destruyó (regla 27).
+    this.input?.destroy();
   }
 }

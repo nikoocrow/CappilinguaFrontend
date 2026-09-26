@@ -10,13 +10,23 @@ export const ZOOM_MAX = 3;
 export const ZOOM_STEP = 0.25;
 const ZOOM_SPEED = 0.0015;
 
+// Cuánto hay que arrastrar (px) antes de considerarlo un drag de cámara en
+// vez de un click: evita que un click con la mano temblorosa dispare una
+// rotación de 0.001 rad en vez de mover/hablar.
+const DRAG_THRESHOLD = 4;
+const DRAG_ROTATE_SPEED = 0.006; // rad por pixel arrastrado
+const KEY_ROTATE_SPEED = 2.2; // rad/s mientras Q o E están apretadas
+
 // Raycasting de clicks sobre el canvas: primero prueba contra los NPCs
 // (onNPC), y si no, contra el suelo (onGround). Los clicks en la UI de
-// diálogo no llegan aquí porque el listener vive en el canvas.
+// diálogo no llegan aquí porque el listener vive en el canvas. El click ya
+// no se dispara en pointerdown sino en pointerup, para poder distinguirlo
+// de un arrastre que rota la cámara (ver _handlePointerMove).
 export default class Input {
   constructor({ ground, npcs, onGround, onNPC }) {
     this.experience = new Experience();
     this.camera = this.experience.camera;
+    this.time = this.experience.time;
     this.canvas = this.experience.canvas;
     this.ground = ground;
     this.npcs = npcs;
@@ -27,11 +37,77 @@ export default class Input {
     this.pointer = new THREE.Vector2();
     this._lastGroundClick = -Infinity;
 
-    this.canvas.addEventListener('pointerdown', (event) => this._handlePointerDown(event));
-    this.canvas.addEventListener('wheel', (event) => this._handleWheel(event), { passive: false });
+    this._dragging = false;
+    this._pointerId = null;
+    this._lastX = 0;
+    this._lastY = 0;
+    this._downX = 0;
+    this._downY = 0;
+
+    // Q/E mantenidas: se leen por frame en update(), la rotación no se
+    // aplica de una vez en el propio keydown (regla 1 del system design).
+    this._rotateLeft = false;
+    this._rotateRight = false;
+
+    this._onPointerDown = (event) => this._handlePointerDown(event);
+    this._onPointerMove = (event) => this._handlePointerMove(event);
+    this._onPointerUp = (event) => this._handlePointerUp(event);
+    this._onWheel = (event) => this._handleWheel(event);
+    this._onKeyDown = (event) => this._handleKeyDown(event);
+    this._onKeyUp = (event) => this._handleKeyUp(event);
+
+    this.canvas.addEventListener('pointerdown', this._onPointerDown);
+    this.canvas.addEventListener('pointermove', this._onPointerMove);
+    this.canvas.addEventListener('pointerup', this._onPointerUp);
+    this.canvas.addEventListener('pointercancel', this._onPointerUp);
+    this.canvas.addEventListener('wheel', this._onWheel, { passive: false });
+    // Q/E no dependen de que el canvas tenga foco (como cualquier atajo de
+    // cámara tipo WASD), así que van a window en vez de al canvas.
+    window.addEventListener('keydown', this._onKeyDown);
+    window.addEventListener('keyup', this._onKeyUp);
   }
 
   _handlePointerDown(event) {
+    if (event.button !== 0) return; // solo botón izquierdo: click o drag de cámara
+    this._dragging = false;
+    this._pointerId = event.pointerId;
+    this._downX = this._lastX = event.clientX;
+    this._downY = this._lastY = event.clientY;
+    // Mantiene los eventos de move/up dirigidos acá aunque el puntero salga
+    // del canvas durante el arrastre.
+    this.canvas.setPointerCapture(event.pointerId);
+  }
+
+  _handlePointerMove(event) {
+    if (this._pointerId === null || event.pointerId !== this._pointerId) return;
+
+    const dx = event.clientX - this._lastX;
+    this._lastX = event.clientX;
+    this._lastY = event.clientY;
+
+    if (!this._dragging) {
+      const totalDx = event.clientX - this._downX;
+      const totalDy = event.clientY - this._downY;
+      if (Math.hypot(totalDx, totalDy) < DRAG_THRESHOLD) return;
+      this._dragging = true;
+    }
+
+    this.camera.rotateBy(-dx * DRAG_ROTATE_SPEED);
+  }
+
+  _handlePointerUp(event) {
+    if (this._pointerId === null || event.pointerId !== this._pointerId) return;
+    this.canvas.releasePointerCapture(event.pointerId);
+    const wasDragging = this._dragging;
+    this._dragging = false;
+    this._pointerId = null;
+
+    // Si hubo arrastre, ese gesto ya rotó la cámara: no interpretarlo
+    // además como un click sobre el suelo/NPC.
+    if (!wasDragging) this._handleClick(event);
+  }
+
+  _handleClick(event) {
     // NDC relativas al canvas, no a la ventana: el canvas ya no ocupa la
     // pantalla entera (vive en el área de contenido del shell), así que usar
     // innerWidth/innerHeight desviaría el rayo. Una llamada por click, no por
@@ -77,5 +153,37 @@ export default class Input {
       ZOOM_MIN,
       ZOOM_MAX
     );
+  }
+
+  _handleKeyDown(event) {
+    if (event.key === 'q' || event.key === 'Q') this._rotateLeft = true;
+    else if (event.key === 'e' || event.key === 'E') this._rotateRight = true;
+  }
+
+  _handleKeyUp(event) {
+    if (event.key === 'q' || event.key === 'Q') this._rotateLeft = false;
+    else if (event.key === 'e' || event.key === 'E') this._rotateRight = false;
+  }
+
+  // Rotación continua mientras Q/E están apretadas. Colgada del tick único
+  // vía World.update() (regla 1 del system design), nunca de un rAF propio.
+  update() {
+    if (!this._rotateLeft && !this._rotateRight) return;
+    const direction = (this._rotateLeft ? 1 : 0) - (this._rotateRight ? 1 : 0);
+    this.camera.rotateBy(direction * KEY_ROTATE_SPEED * this.time.delta);
+  }
+
+  // Los listeners de pointer/wheel viven en el canvas (se descartan solos
+  // cuando React desmonta la pantalla y el canvas sale del DOM), pero Q/E
+  // están en window, que nunca se destruye: sin este cleanup, cada
+  // remontaje del juego (regla 27) apilaría otro par de listeners.
+  destroy() {
+    this.canvas.removeEventListener('pointerdown', this._onPointerDown);
+    this.canvas.removeEventListener('pointermove', this._onPointerMove);
+    this.canvas.removeEventListener('pointerup', this._onPointerUp);
+    this.canvas.removeEventListener('pointercancel', this._onPointerUp);
+    this.canvas.removeEventListener('wheel', this._onWheel);
+    window.removeEventListener('keydown', this._onKeyDown);
+    window.removeEventListener('keyup', this._onKeyUp);
   }
 }
